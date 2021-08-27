@@ -1,0 +1,24 @@
+---
+- hosts: all
+  remote_user: wangsen3
+  become: yes
+  become_method: sudo
+  become_user: root
+
+  tasks:
+    - name: install supervisord
+      yum: name=supervisor state=latest
+    - name: xiugai super.cong
+      shell: sed -i '$s/\*.ini/\*.conf/' /etc/supervisord.conf
+    - name: copy falcon config file
+      template: src=./open-falcon.conf dest=/etc/supervisord.d/open-falcon.conf
+      notfiy:
+        - start supervisor
+
+    handlers:
+      - name: start supervisor
+        service: name=supervisord state=start
+
+#    - name: start falcon
+#      shell: supervisorctl reread &&  supervisorctl update
+

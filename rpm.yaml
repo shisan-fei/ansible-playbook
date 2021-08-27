@@ -1,0 +1,44 @@
+#将两个rpm包发到指定主机进行安装
+---
+- hosts: test
+  vars:
+    pak_dir: VDN-3207
+  tasks:
+  - name: Copy rpm nats-server to server
+    copy:
+      src: '{{ item.src }}'
+      dest: '{{ item.dest }}'
+    with_items:
+      - { src: '/root/{{ pak_dir }}/nats-server-v2.1.0-amd64.rpm' , dest: '/usr/local/src/{{ pak_dir }}/'}
+      - { src: '/root/{{ pak_dir }}/krtc_gslb-1.0.0.0-1.0.0.0.x86_64.rpm' , dest: '/usr/local/src/{{ pak_dir }}/'}
+
+  #- name: install nats-server
+  #  command: >
+  #    cd /usr/local/src/{{ pak_dir }}/
+  #    rpm -Uvh --force  nats-server-v2.1.0-amd64.rpm
+  - name: install nats-server
+    yum: name=/usr/local/src/VDN-3207/nats-server-v2.1.0-amd64.rpm stats=persent
+
+  - name: start nats-server
+    command: nohup /usr/local/bin/nats-server & g
+
+  #- name: install krtc_gslb
+  #  command: >
+  #    cd /usr/local/src/{{ pak_dir }}/
+  #    rpm -Uvh --force  krtc_gslb-1.0.0.0-1.0.0.0.x86_64.rpm
+
+  - name: install krtc_gslb
+    - yum:
+        name: "/usr/local/src/VDN-3207/krtc_gslb-1.0.0.0-1.0.0.0.x86_64.rpm"
+        stats: "persent"
+
+  - name: start krtc_gslb
+    command: /usr/local/krtc_gslb/krtc_gslb_server start
+
+  - name: check version
+    command: curl -i "http://127.0.0.1:9999/check"
+
+
+#  - name: move to nats-server-pak home
+#    shell: /usr/bin/cd /usr/local/src/VDN-3207/
+
